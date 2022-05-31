@@ -20,6 +20,11 @@ export const loadCurrentConsecutiveWins = async() => {
   const consecutiveWins = await helloWorldContract.methods.consecutiveWins().call();
   console.log(consecutiveWins);
   return consecutiveWins;
+};
+
+export const getBlockNumber = async() => {
+  const blockNumber = await web3.eth.getBlockNumber();
+  return blockNumber;
 }
 
 export const connectWallet = async () => {
@@ -115,11 +120,14 @@ export const updateMessage = async (address, message) => {
     };
   }
 
+  const flipSide = parseInt(message) >= 1 ? true : false;
+  console.log(flipSide);
+
   //set up transaction parameters
   const transactionParameters = {
     to: contractAddress,  // Required except during contract publications.
     from: address,        // must match user's active address.
-    data: helloWorldContract.methods.flip(message).encodeABI(),
+    data: helloWorldContract.methods.flip(flipSide).encodeABI(),
   };
 
   //sign the transaction

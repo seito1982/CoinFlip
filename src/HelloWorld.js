@@ -4,6 +4,7 @@ import {
   helloWorldContract,
   connectWallet,
   updateMessage,
+  getBlockNumber,
   // loadCurrentMessage,
   loadCurrentConsecutiveWins,
   getCurrentWalletConnected,
@@ -13,6 +14,7 @@ import alchemylogo from "./alchemylogo.svg";
 
 const HelloWorld = () => {
   //state variables
+  const [expectedSide, setExpectedSide] = useState("0");
   const [walletAddress, setWallet] = useState("");
   const [status, setStatus] = useState("");
   const [consecutiveWins, setConsecutiveWins] = useState("0"); //default message
@@ -77,13 +79,22 @@ const HelloWorld = () => {
     setWallet(walletResponse.address);
   };
 
-  const onUpdatePressed = async () => {
-    const { status } = await updateMessage(walletAddress, mySide);
-    setStatus(status);
-
+  const onUpdateFlip = async () => {
     const consWins = await loadCurrentConsecutiveWins();
     setConsecutiveWins(consWins);
   };
+
+  const onUpdateConsecutiveWins = async() => {
+    const consWins = await loadCurrentConsecutiveWins();
+    setConsecutiveWins(consWins);
+  }
+
+  const onExpectSidePress = async() => {
+    setExpectedSide("1");
+
+    const blockNumber = await getBlockNumber();
+    console.log('The latest block number is: ' + blockNumber);
+  }
 
   //the UI of our component
   return (
@@ -99,25 +110,39 @@ const HelloWorld = () => {
           <span>Connect Wallet</span>
         )}
       </button>
-
-      <h2 style={{ paddingTop: "50px" }}>ConsecutiveWin:</h2>
-      <p>{consecutiveWins}</p>
-
-      <h2 style={{ paddingTop: "18px" }}>My Side:</h2>
-
-      <div>
-        <input
-          type="text"
-          placeholder="Input the coin's side (Front-1, Back-0)"
-          onChange={(e) => setMySide(e.target.value)}
-          value={mySide}
-        />
-        <p id="status">{status}</p>
-
-        <button id="publish" onClick={onUpdatePressed}>
-          Try
-        </button>
+      <div style={{display: "flex", clear: "both"}}>
+          <div className="action-panel">
+            <h2 style={{paddingTop: "50px"}}>Expected Side: </h2>
+            <p>{expectedSide}</p>
+            <button id="peek" onClick={onExpectSidePress}>
+                Peek
+            </button>
+          </div>
+          <div className="action-panel">
+            <h2 style={{paddingTop: "50px"}}>My Side: </h2>
+              <input
+                type="text"
+                placeholder="Front: 1, Back: 0"
+                onChange={(e) => setMySide(e.target.value)}
+                value={mySide}
+              />
+              <button id="publish" onClick={onUpdateFlip}>
+                Flip
+              </button>
+          </div>
       </div>
+      
+      <div>
+        <p id="status">{status}</p>
+      </div>
+
+      <hr style={{marginTop: "20px"}}/>
+
+      <h2 style={{ paddingTop: "50px" }}>ConsecutiveWin: <span>{consecutiveWins} </span> </h2>
+      <button id="update_consecutivewins" onClick={onUpdateConsecutiveWins}>
+        Update ConsecutiveWin
+      </button>
+
     </div>
   );
 };
