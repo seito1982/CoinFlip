@@ -1,13 +1,12 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import {
-  helloWorldContract,
   connectWallet,
-  updateMessage,
   getBlockNumber,
-  // loadCurrentMessage,
+  updateFlip,
+  forceFlip,
+  guessFlip,
   loadCurrentConsecutiveWins,
-  getCurrentWalletConnected,
 } from "./util/interact.js";
 
 import alchemylogo from "./alchemylogo.svg";
@@ -17,7 +16,7 @@ const HelloWorld = () => {
   const [expectedSide, setExpectedSide] = useState("0");
   const [walletAddress, setWallet] = useState("");
   const [status, setStatus] = useState("");
-  const [consecutiveWins, setConsecutiveWins] = useState("0"); //default message
+  const [consecutiveWins, setConsecutiveWins] = useState(""); //default message
   const [mySide, setMySide] = useState("1");
 
   //called only once
@@ -80,20 +79,26 @@ const HelloWorld = () => {
   };
 
   const onUpdateFlip = async () => {
-    const consWins = await loadCurrentConsecutiveWins();
-    setConsecutiveWins(consWins);
+    const { status } = await updateFlip(walletAddress, mySide);
+    setStatus(status);
   };
+
+  const onForceFlip = async () => {
+    const { status } = await forceFlip(walletAddress, mySide);
+    setStatus(status);
+  }
 
   const onUpdateConsecutiveWins = async() => {
     const consWins = await loadCurrentConsecutiveWins();
     setConsecutiveWins(consWins);
   }
 
-  const onExpectSidePress = async() => {
-    setExpectedSide("1");
-
+  const onGuessFlip = async() => {
     const blockNumber = await getBlockNumber();
     console.log('The latest block number is: ' + blockNumber);
+
+    const expSide = await guessFlip(walletAddress, mySide);
+    setExpectedSide(expSide);
   }
 
   //the UI of our component
@@ -114,8 +119,8 @@ const HelloWorld = () => {
           <div className="action-panel">
             <h2 style={{paddingTop: "50px"}}>Expected Side: </h2>
             <p>{expectedSide}</p>
-            <button id="peek" onClick={onExpectSidePress}>
-                Peek
+            <button id="peek" onClick={onGuessFlip}>
+                Guess
             </button>
           </div>
           <div className="action-panel">
@@ -131,17 +136,22 @@ const HelloWorld = () => {
               </button>
           </div>
       </div>
-      
-      <div>
-        <p id="status">{status}</p>
-      </div>
+
+      {/* <hr style={{marginTop: "20px"}}/>
+      <button id="update_force_flip" onClick={onForceFlip}>
+        Force Flip
+      </button> */}
 
       <hr style={{marginTop: "20px"}}/>
-
       <h2 style={{ paddingTop: "50px" }}>ConsecutiveWin: <span>{consecutiveWins} </span> </h2>
       <button id="update_consecutivewins" onClick={onUpdateConsecutiveWins}>
         Update ConsecutiveWin
       </button>
+      
+      <hr style={{marginTop: "20px"}}/>
+      <div>
+        <p id="status">{status}</p>
+      </div>
 
     </div>
   );
